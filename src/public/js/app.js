@@ -4,10 +4,15 @@ const myFace = document.getElementById('myFace');
 const muteBtn = document.getElementById('mute');
 const cameraBtn = document.getElementById('camera');
 const cameraSelect = document.getElementById('cameras');
+const call = document.getElementById('call');
+
+call.hidden=true;
 
 let myStream;
 let mic = true;
 let camera = true;
+let roomName;
+let myPeerConnection
 
 async function getMedia(deviceId){
   const initialConstrains = {
@@ -28,8 +33,6 @@ async function getMedia(deviceId){
     console.log(e)
   }
 }
-
-getMedia()
 
 async function getCameras(){
   try{
@@ -80,3 +83,51 @@ async function handleCameraChange(){
 muteBtn.addEventListener("click",handleMuteClick)
 cameraBtn.addEventListener("click",handleCameraClick)
 cameraSelect.addEventListener("input",handleCameraChange)
+
+const welcome = document.getElementById('welcome');
+const welcomeForm = welcome.querySelector('form')
+
+async function initCall(){
+  welcome.hidden = true
+  call.hidden = false
+  await getMedia()
+  makeConnection()
+}
+
+async function handleWelcomeSubmit(e){
+  e.preventDefault();
+  const input = welcomeForm.querySelector('input')
+  await initCall()
+  socket.emit('join_room',input.value , initCall)
+  roomName = input.value
+  input.value = ''
+}
+
+welcomeForm.addEventListener('submit',handleWelcomeSubmit)
+
+
+socket.on('welcome',async ()=>{
+  const offer = await myPeerConnection.createOffer()
+  myPeerConnection.setLocalDescription(offer)
+  socket.emit("offer",offer,roomName)
+})
+
+socket.on('offer',async (offer)=>{
+  myPeerConnection.setRemoteDescription(offer)
+  console.log(offer)
+  const answer = await myPeerConnection.createAnswer()
+  console.log(answer)
+  myPeerConnection.setLocalDescription(answer)
+  socket.emit('answer',answer,roomName)
+})
+
+socket.on('answer',(answer)=>{
+  myPeerConnection.setRemoteDescription(answer)
+})
+
+function makeConnection(){
+  myPeerConnection = new RTCPeerConnection()
+  myStream
+    .getTracks()
+    .forEach((track) => myPeerConnection.addTrack(track, myStream))
+}
