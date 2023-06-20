@@ -9,5 +9,10 @@ html(lang="en")
         header
             h1 TheZoom
         main
+            div#myStream
+                video#myFace(autoplay,playsinline,width='400',height='400')
+                button#mute MIC ON
+                button#camera CAMERA ON
+                select#cameras
         script(src="/socket.io/socket.io.js")
         script(src="/public/js/app.js")
