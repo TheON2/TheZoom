@@ -9,22 +9,5 @@ html(lang="en")
         header
             h1 TheZoom
         main
-            div#welcome
-                form
-                    input#nickName(placeholder="nickname", required, type="text" name="nickname")
-                    input#roomName(placeholder="room name", required, type="text" name="roomname")
-                    button Enter Room
-                h4 Open Rooms:
-                ul
-            div#room
-                h3
-                ul
-                form#name
-                    h3 현재 닉네임 :
-                    input(placeholder="Nickname" requied,type="text")
-                    button Change
-                form#msg
-                    input(placeholder="message", required, type="text")
-                    button Send
         script(src="/socket.io/socket.io.js")
         script(src="/public/js/app.js")
