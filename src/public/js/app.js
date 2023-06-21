@@ -23,12 +23,21 @@ welcomeForm.addEventListener('submit',handleWelcomeSubmit)
 
 
 socket.on('welcome',async ()=>{
+  myDataChannel = myPeerConnection.createDataChannel('chat')
+  myDataChannel.addEventListener('message', console.log)
+  console.log('made data channel')
   const offer = await myPeerConnection.createOffer()
   myPeerConnection.setLocalDescription(offer)
   socket.emit("offer",offer,roomName)
 })
 
 socket.on('offer',async (offer)=>{
+  myPeerConnection.addEventListener('datachannel',(event)=>{
+    myDataChannel = event.channel;
+    myDataChannel.addEventListener('message',(event)=>{
+      alert(event.data)
+    })
+  })
   myPeerConnection.setRemoteDescription(offer)
   console.log(offer)
   const answer = await myPeerConnection.createAnswer()
