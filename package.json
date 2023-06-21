@@ -18,8 +18,11 @@
   "dependencies": {
     "@socket.io/admin-ui": "^0.5.1",
     "express": "^4.18.2",
+    "local": "^0.3.3",
+    "localtunnel": "^2.0.2",
     "pug": "^3.0.2",
     "socket.io": "^4.6.1",
+    "tunnel": "^0.0.6",
     "ws": "^8.12.1"
   }
 }
