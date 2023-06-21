@@ -9,6 +9,7 @@ const welcome = document.getElementById('welcome');
 const welcomeForm = welcome.querySelector('form')
 const waitingroom = document.getElementById('waitingroom');
 const waitingContainer = waitingroom.querySelector('#roomContainer');
+const nickName = waitingroom.querySelector('#nickname');
 
 call.hidden=true;
 waitingroom.hidden=true;
@@ -16,8 +17,8 @@ let myStream;
 let mic = true;
 let camera = true;
 let roomName;
-let nickName;
 let myPeerConnection
+let nick;
 
 muteBtn.addEventListener("click",handleMuteClick)
 cameraBtn.addEventListener("click",handleCameraClick)
@@ -32,10 +33,27 @@ socket.on('welcome',async ()=>{
   const offer = await myPeerConnection.createOffer()
   myPeerConnection.setLocalDescription(offer)
   socket.emit("offer",offer,roomName)
+  console.log('welcome done')
 })
 
-socket.on('room',async ()=>{
-
+socket.on('room',async (rooms)=>{
+  let room = rooms
+  room.forEach((a,i)=>{
+    let room = `<div class="col-md-3 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">${i+1}. ${a.roomName} ${a.member.length}/${a.roomMax}</h5>
+                            <p class="card-text">Click to join the chat room.</p>
+                            <a href="#" class="btn btn-primary" onclick="joinRoom('${a.roomName}')">Join</a>
+                        </div>
+                    </div>
+                 </div>
+    `
+    //룸 컨테이너에 append한다
+    waitingContainer.insertAdjacentHTML('beforeend', room)
+  })
+  welcome.hidden = true
+  waitingroom.hidden = false
 })
 
 socket.on('offer',async (offer)=>{
@@ -148,35 +166,16 @@ async function initCall(){
 function handleWelcomeSubmit(e){
   e.preventDefault();
   const input = welcomeForm.querySelector('input')
-  roomName = input.value
+  nick = input.value
+  nickName.innerHTML = '나의 닉네임 :'+nick
   input.value = ''
-
-  //방 정보들을 서버에서 갖고 와서 방의 갯수를 기준으로 렌더링 해야한다
-
-  //룸 컨테이너를 찾아낸다
-
-  //더미 카드를 만들어낸다
-  for (let i = 0; i < room; i++) {
-    let room = `<div class="col-md-3 mb-4">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title">Chat Room 1</h5>
-                            <p class="card-text">Click to join the chat room.</p>
-                            <a href="#" class="btn btn-primary">Join</a>
-                        </div>
-                    </div>
-                 </div>
-    `
-    //룸 컨테이너에 append한다
-    waitingContainer.innerHTML += room;
-  }
-  welcome.hidden = true
-  waitingroom.hidden = false
+  socket.emit('join')
 }
 
-async function handleJoinRoom(){
+async function joinRoom(room){
+  roomName=room
   await initCall()
-  socket.emit('join_room',input.value , initCall)
+  socket.emit('join_room',room,nick,initCall)
 }
 
 function makeConnection(){

@@ -18,26 +18,33 @@ const wsServer = SocketIO(httpServer);
 
 const handleListen = () => console.log(`Listening on http://localhost:3000`);
 
-let room = 8
-
-let users = []
+let rooms = [{member:[1,2],roomName:'123',roomMax:8,}]
 
 wsServer.on('connection',(socket)=>{
-  socket.on('join',(nickName)=>{
-    users.push(nickName)
-    console.log(users)
-    socket.to(nickName).emit('room',room)
+
+  socket.on('join',()=>{
+    socket.emit('room',rooms)
+    console.log(rooms)
   })
-  socket.on('join_room',(roomName)=>{
+
+  socket.on('join_room',(roomName,nickName)=>{
+    console.log(roomName,nickName)
     socket.join(roomName)
+    rooms.forEach((a)=>{
+      if(a.roomName===String(roomName)) a.member.push(nickName)
+    })
+    console.log(rooms)
     socket.to(roomName).emit('welcome')
   })
+
   socket.on('offer',(offer,roomName) => {
     socket.to(roomName).emit('offer',offer)
   })
+
   socket.on('answer',(answer,roomName)=>{
     socket.to(roomName).emit('answer',answer)
   })
+
   socket.on('ice',(ice,roomName)=>{
     socket.to(roomName).emit('ice',ice)
   })
