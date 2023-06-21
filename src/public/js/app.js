@@ -5,14 +5,46 @@ const muteBtn = document.getElementById('mute');
 const cameraBtn = document.getElementById('camera');
 const cameraSelect = document.getElementById('cameras');
 const call = document.getElementById('call');
+const welcome = document.getElementById('welcome');
+const welcomeForm = welcome.querySelector('form')
+
 
 call.hidden=true;
-
 let myStream;
 let mic = true;
 let camera = true;
 let roomName;
 let myPeerConnection
+
+muteBtn.addEventListener("click",handleMuteClick)
+cameraBtn.addEventListener("click",handleCameraClick)
+cameraSelect.addEventListener("input",handleCameraChange)
+welcomeForm.addEventListener('submit',handleWelcomeSubmit)
+
+
+socket.on('welcome',async ()=>{
+  const offer = await myPeerConnection.createOffer()
+  myPeerConnection.setLocalDescription(offer)
+  socket.emit("offer",offer,roomName)
+})
+
+socket.on('offer',async (offer)=>{
+  myPeerConnection.setRemoteDescription(offer)
+  console.log(offer)
+  const answer = await myPeerConnection.createAnswer()
+  console.log(answer)
+  myPeerConnection.setLocalDescription(answer)
+  socket.emit('answer',answer,roomName)
+})
+
+socket.on('answer',(answer)=>{
+  myPeerConnection.setRemoteDescription(answer)
+})
+
+socket.on('ice',(ice)=>{
+  console.log('recieved candidate')
+  myPeerConnection.addIceCandidate(ice);
+})
 
 async function getMedia(deviceId){
   const initialConstrains = {
@@ -89,12 +121,6 @@ async function handleCameraChange(){
   }
 }
 
-muteBtn.addEventListener("click",handleMuteClick)
-cameraBtn.addEventListener("click",handleCameraClick)
-cameraSelect.addEventListener("input",handleCameraChange)
-
-const welcome = document.getElementById('welcome');
-const welcomeForm = welcome.querySelector('form')
 
 async function initCall(){
   welcome.hidden = true
@@ -111,33 +137,6 @@ async function handleWelcomeSubmit(e){
   roomName = input.value
   input.value = ''
 }
-
-welcomeForm.addEventListener('submit',handleWelcomeSubmit)
-
-
-socket.on('welcome',async ()=>{
-  const offer = await myPeerConnection.createOffer()
-  myPeerConnection.setLocalDescription(offer)
-  socket.emit("offer",offer,roomName)
-})
-
-socket.on('offer',async (offer)=>{
-  myPeerConnection.setRemoteDescription(offer)
-  console.log(offer)
-  const answer = await myPeerConnection.createAnswer()
-  console.log(answer)
-  myPeerConnection.setLocalDescription(answer)
-  socket.emit('answer',answer,roomName)
-})
-
-socket.on('answer',(answer)=>{
-  myPeerConnection.setRemoteDescription(answer)
-})
-
-socket.on('ice',(ice)=>{
-  console.log('recieved candidate')
-  myPeerConnection.addIceCandidate(ice);
-})
 
 function makeConnection(){
   myPeerConnection = new RTCPeerConnection({
