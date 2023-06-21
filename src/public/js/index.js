@@ -7,13 +7,16 @@ const cameraSelect = document.getElementById('cameras');
 const call = document.getElementById('call');
 const welcome = document.getElementById('welcome');
 const welcomeForm = welcome.querySelector('form')
-
+const waitingroom = document.getElementById('waitingroom');
+const waitingContainer = waitingroom.querySelector('#roomContainer');
 
 call.hidden=true;
+waitingroom.hidden=true;
 let myStream;
 let mic = true;
 let camera = true;
 let roomName;
+let nickName;
 let myPeerConnection
 
 muteBtn.addEventListener("click",handleMuteClick)
@@ -29,6 +32,10 @@ socket.on('welcome',async ()=>{
   const offer = await myPeerConnection.createOffer()
   myPeerConnection.setLocalDescription(offer)
   socket.emit("offer",offer,roomName)
+})
+
+socket.on('room',async ()=>{
+
 })
 
 socket.on('offer',async (offer)=>{
@@ -132,19 +139,44 @@ async function handleCameraChange(){
 
 
 async function initCall(){
-  welcome.hidden = true
+  waitingroom.hidden = true
   call.hidden = false
   await getMedia()
   makeConnection()
 }
 
-async function handleWelcomeSubmit(e){
+function handleWelcomeSubmit(e){
   e.preventDefault();
   const input = welcomeForm.querySelector('input')
-  await initCall()
-  socket.emit('join_room',input.value , initCall)
   roomName = input.value
   input.value = ''
+
+  //방 정보들을 서버에서 갖고 와서 방의 갯수를 기준으로 렌더링 해야한다
+
+  //룸 컨테이너를 찾아낸다
+
+  //더미 카드를 만들어낸다
+  for (let i = 0; i < room; i++) {
+    let room = `<div class="col-md-3 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Chat Room 1</h5>
+                            <p class="card-text">Click to join the chat room.</p>
+                            <a href="#" class="btn btn-primary">Join</a>
+                        </div>
+                    </div>
+                 </div>
+    `
+    //룸 컨테이너에 append한다
+    waitingContainer.innerHTML += room;
+  }
+  welcome.hidden = true
+  waitingroom.hidden = false
+}
+
+async function handleJoinRoom(){
+  await initCall()
+  socket.emit('join_room',input.value , initCall)
 }
 
 function makeConnection(){

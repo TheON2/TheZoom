@@ -18,7 +18,16 @@ const wsServer = SocketIO(httpServer);
 
 const handleListen = () => console.log(`Listening on http://localhost:3000`);
 
+let room = 8
+
+let users = []
+
 wsServer.on('connection',(socket)=>{
+  socket.on('join',(nickName)=>{
+    users.push(nickName)
+    console.log(users)
+    socket.to(nickName).emit('room',room)
+  })
   socket.on('join_room',(roomName)=>{
     socket.join(roomName)
     socket.to(roomName).emit('welcome')

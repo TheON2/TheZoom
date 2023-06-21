@@ -5,6 +5,8 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>TheZoom</title>
     <link rel="stylesheet" href="https://unpkg.com/mvp.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
 </head>
 <body>
 <header>
@@ -13,9 +15,24 @@
 <main>
     <div id="welcome">
         <form>
-            <input type="text" placeholder="room name" required>
+            <input type="text" placeholder="닉네임을 입력하세요" required>
             <button>Enter Room</button>
         </form>
+    </div>
+    <div id="waitingroom" class="container" >
+        <div class="row" id="roomContainer">
+            <!-- Here we create 8 chat rooms -->
+<!--            <div class="col-md-3 mb-4">-->
+<!--                <div class="card">-->
+<!--                    <div class="card-body">-->
+<!--                        <h5 class="card-title">Chat Room 1</h5>-->
+<!--                        <p class="card-text">Click to join the chat room.</p>-->
+<!--                        <a href="#" class="btn btn-primary">Join</a>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+            <!-- Repeat the column div for each chat room -->
+        </div>
     </div>
     <div id="call">
         <div id="myStream">
@@ -28,6 +45,6 @@
     </div>
 </main>
 <script src="/socket.io/socket.io.js"></script>
-<script src="/public/js/app.js"></script>
+<script src="/public/js/index.js"></script>
 </body>
 </html>
