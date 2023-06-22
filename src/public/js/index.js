@@ -19,6 +19,7 @@ let camera = true;
 let roomName;
 let myPeerConnection
 let nick;
+let answerNick;
 
 muteBtn.addEventListener("click",handleMuteClick)
 cameraBtn.addEventListener("click",handleCameraClick)
@@ -34,6 +35,10 @@ socket.on('welcome',async ()=>{
   myPeerConnection.setLocalDescription(offer)
   socket.emit("offer",offer,roomName)
   console.log('welcome done')
+})
+
+socket.on('nickName_fale',async (error)=> {
+  alert(error)
 })
 
 socket.on('room',async (rooms)=>{
@@ -56,7 +61,7 @@ socket.on('room',async (rooms)=>{
   waitingroom.hidden = false
 })
 
-socket.on('offer',async (offer)=>{
+socket.on('offer',async (offer,nickName)=>{
   myPeerConnection.addEventListener('datachannel',(event)=>{
     myDataChannel = event.channel;
     myDataChannel.addEventListener('message',(event)=>{
@@ -68,11 +73,13 @@ socket.on('offer',async (offer)=>{
   const answer = await myPeerConnection.createAnswer()
   console.log(answer)
   myPeerConnection.setLocalDescription(answer)
-  socket.emit('answer',answer,roomName)
+  socket.emit('answer',answer,nickName)
 })
 
-socket.on('answer',(answer)=>{
+socket.on('answer',(answer,ansNickName)=>{
+  alert(ansNickName)
   myPeerConnection.setRemoteDescription(answer)
+  answerNick=ansNickName
 })
 
 socket.on('ice',(ice)=>{
@@ -155,7 +162,6 @@ async function handleCameraChange(){
   }
 }
 
-
 async function initCall(){
   waitingroom.hidden = true
   call.hidden = false
@@ -166,16 +172,14 @@ async function initCall(){
 function handleWelcomeSubmit(e){
   e.preventDefault();
   const input = welcomeForm.querySelector('input')
-  nick = input.value
-  nickName.innerHTML = '나의 닉네임 :'+nick
+  socket.emit('join',input.value)
   input.value = ''
-  socket.emit('join')
 }
 
 async function joinRoom(room){
   roomName=room
   await initCall()
-  socket.emit('join_room',room,nick,initCall)
+  socket.emit('join_room',room,initCall)
 }
 
 function makeConnection(){
@@ -201,7 +205,8 @@ function makeConnection(){
 
 function handleIce(data){
   console.log('sent candidate')
-  socket.emit('ice',data.candidate, roomName)
+  console.log(answerNick)
+  socket.emit('ice',data.candidate, answerNick)
 }
 
 function handleAddStream(data){
